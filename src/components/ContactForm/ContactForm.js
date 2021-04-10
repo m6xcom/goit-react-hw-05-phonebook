@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import { ADDCONTACT } from "../../redux/contacts/contacts-actions";
 import style from "./ContactForm.module.css";
 
-const ContactForm = ({ addContact }) => {
+const ContactForm = ({ contacts, addContact }) => {
   const nameInput = shortid.generate();
   const numberInput = shortid.generate();
   return (
@@ -13,11 +13,21 @@ const ContactForm = ({ addContact }) => {
       className={style.form}
       onSubmit={(e) => {
         e.preventDefault();
-        addContact({
-          id: shortid.generate(),
-          name: e.target.children.name.value,
-          number: e.target.children.number.value,
-        });
+        if (
+          contacts.every(
+            (el) =>
+              el.name.toLowerCase() !==
+              e.target.children.name.value.toLowerCase()
+          )
+        ) {
+          addContact({
+            id: shortid.generate(),
+            name: e.target.children.name.value,
+            number: e.target.children.number.value,
+          });
+        } else {
+          alert(`${e.target.children.name.value} is already in contacts.`);
+        }
         e.target.reset();
       }}
     >
@@ -32,11 +42,15 @@ const ContactForm = ({ addContact }) => {
   );
 };
 
+const mapStateToProps = (state) => ({
+  contacts: state.contacts.items,
+});
+
 const mapDispatchToProps = (dispatch) => ({
   addContact: (contact) => dispatch(ADDCONTACT(contact)),
 });
 
-export default connect(null, mapDispatchToProps)(ContactForm);
+export default connect(mapStateToProps, mapDispatchToProps)(ContactForm);
 
 ContactForm.propTypes = {
   addContact: PropTypes.func,
